@@ -35,7 +35,6 @@ class PedidoController extends Pedido implements IApiUsable
     {
 
         $id = $args['id'];
-        $pedido = Pedido::obtenerPedido($id);
         
         try 
         {

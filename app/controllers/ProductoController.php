@@ -37,7 +37,6 @@ class ProductoController extends Producto implements IApiUsable
     {
 
         $id = $args['id'];
-        $producto = Producto::obtenerProducto($id);
         
         try 
         {

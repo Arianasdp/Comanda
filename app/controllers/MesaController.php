@@ -18,7 +18,7 @@ class MesaController extends Mesa implements IApiUsable
         try 
         {
             $id_nuevo_mesa = $mesa->crearMesa();
-            $payload = json_encode(array("mensaje" => "mesa creada con éxito", "id_mesa" => $id_nuevo_mesa));
+            $payload = json_encode(array("mensaje" => "Mesa creada con éxito", "id_mesa" => $id_nuevo_mesa));
             $response = $response->withStatus(201);
         } catch (Exception $e) 
         {
@@ -35,7 +35,6 @@ class MesaController extends Mesa implements IApiUsable
     {
 
         $id = $args['id'];
-        $mesa = Mesa::obtenerMesa($id);
         
         try 
         {
