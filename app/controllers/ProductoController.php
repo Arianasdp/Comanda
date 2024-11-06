@@ -16,7 +16,6 @@ class ProductoController extends Producto implements IApiUsable
         $producto->id_pedido = $id_pedido;
         $producto->nombre = $nombre;
         $producto->sector = $sector;
-        $producto->crearProducto();
 
         try 
         {
@@ -74,7 +73,7 @@ class ProductoController extends Producto implements IApiUsable
     public function ModificarUno($request, $response, $args)
     {
         $parametros = $request->getParsedBody();
-        $id = $args['id'];
+        $id = $parametros['id'];
 
         try 
         {
@@ -93,7 +92,6 @@ class ProductoController extends Producto implements IApiUsable
     public function BorrarUno($request, $response, $args)
     {
         $parametros = $request->getParsedBody();
-
         $id = $parametros['id'];
 
         try

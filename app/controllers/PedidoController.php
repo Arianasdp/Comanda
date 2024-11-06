@@ -14,7 +14,6 @@ class PedidoController extends Pedido implements IApiUsable
         $pedido = new Pedido();
         $pedido->id_mesa = $id_mesa;
         $pedido->tiempo_estimado = $tiempo_estimado;
-        $pedido->crearPedido();
 
         try 
         {
