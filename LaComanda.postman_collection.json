@@ -493,6 +493,14 @@
 					"response": []
 				},
 				{
+					"name": "Listar productos entregados tarde",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				},
+				{
 					"name": "Listar pedidos y sus estados",
 					"request": {
 						"auth": {
