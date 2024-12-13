@@ -10,9 +10,8 @@ class Asistencia
     public function crearAsistencia()
     {
         $objAccesoDatos = AccesoDatos::obtenerInstancia();
-        $consulta = $objAccesoDatos->prepararConsulta("INSERT INTO asistencias (id_usuario, fecha) VALUES (:id_usuario, :fecha)");
+        $consulta = $objAccesoDatos->prepararConsulta("INSERT INTO asistencias (id_usuario, fecha) VALUES (:id_usuario, NOW())");
         $consulta->bindValue(':id_usuario', $this->id_usuario, PDO::PARAM_INT);
-        $consulta->bindValue(':fecha', $this->fecha, PDO::PARAM_STR);
         $consulta->execute();
 
         return $objAccesoDatos->obtenerUltimoId();
@@ -55,6 +54,17 @@ class Asistencia
         $consulta->execute();
 
         return $consulta->rowCount() > 0;
+    }
+
+    public function existeAsistenciaHoy($idUsuario)
+    {
+        $hoy = date('Y-m-d');
+        $objAccesoDato = AccesoDatos::obtenerInstancia();
+        $consulta = $objAccesoDato->prepararConsulta("SELECT * FROM asistencias WHERE id_usuario = :id_usuario AND DATE(fecha) = :hoy");
+        $consulta->bindValue(':id_usuario', $idUsuario, PDO::PARAM_INT);
+        $consulta->bindValue(':hoy', $hoy, PDO::PARAM_STR);
+        $consulta->execute();
+        return $consulta->fetch(PDO::FETCH_ASSOC) ? true : false;
     }
 
 }

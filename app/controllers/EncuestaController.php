@@ -8,6 +8,8 @@ class EncuestaController extends Encuesta implements IApiUsable
     {
         $parametros = $request->getParsedBody();
 
+        $id_pedido = $parametros['id_pedido'];
+        $codigo_mesa = $parametros['codigo_mesa'];
         $mesa = $parametros['mesa'];
         $restaurante = $parametros['restaurante'];
         $mozo = $parametros['mozo'];
@@ -15,6 +17,8 @@ class EncuestaController extends Encuesta implements IApiUsable
         $experiencia = $parametros['experiencia'];
 
         $encuesta = new Encuesta();
+        $encuesta->id_pedido = $id_pedido;
+        $encuesta->codigo_mesa = $codigo_mesa;
         $encuesta->mesa = $mesa;
         $encuesta->restaurante = $restaurante;
         $encuesta->mozo = $mozo;
@@ -24,7 +28,7 @@ class EncuestaController extends Encuesta implements IApiUsable
         try 
         {
             $id_nuevo_encuesta = $encuesta->crearEncuesta();
-            $payload = json_encode(array("mensaje" => "Encuesta creada con éxito", "id_mesa" => $id_nuevo_encuesta));
+            $payload = json_encode(array("mensaje" => "Encuesta creada con exito", "id_encuesta" => $id_nuevo_encuesta));
             $response = $response->withStatus(201);
         } catch (Exception $e) 
         {
@@ -77,6 +81,7 @@ class EncuestaController extends Encuesta implements IApiUsable
     {
         $parametros = $request->getParsedBody();
         $id = $parametros['id'];
+        $id_mesa = $parametros['id_mesa'];
         $mesa = $parametros['mesa'];
         $restaurante = $parametros['restaurante'];
         $mozo = $parametros['mozo'];
@@ -85,7 +90,7 @@ class EncuestaController extends Encuesta implements IApiUsable
 
         try 
         {
-            Encuesta::modificarEncuesta($id, $mesa, $restaurante, $mozo, $cocinero, $experiencia);
+            Encuesta::modificarEncuesta($id, $id_mesa, $mesa, $restaurante, $mozo, $cocinero, $experiencia);
             $payload = json_encode(array("mensaje" => "Encuesta modificada correctamente"));
             
             $response->getBody()->write($payload);
@@ -124,5 +129,14 @@ class EncuestaController extends Encuesta implements IApiUsable
             $response->getBody()->write($payload);
             return $response->withHeader('Content-Type', 'application/json')->withStatus(500);
         }   
+    }
+
+    public function TraerMejoresComentarios($request, $response)
+    {
+        $lista = Encuesta::obtenerMejoresComentarios();
+        $payload = json_encode(array("lista de mejores comentarios " => $lista));
+
+        $response->getBody()->write($payload);
+        return $response->withHeader('Content-Type', 'application/json');
     }
 }

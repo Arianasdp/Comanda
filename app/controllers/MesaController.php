@@ -8,17 +8,15 @@ class MesaController extends Mesa implements IApiUsable
     {
         $parametros = $request->getParsedBody();
 
-        $id_mesa = $parametros['id_mesa'];
-        $tiempo_estimado = $parametros['tiempo_estimado'];
+        $codigo = $parametros['codigo'];
 
         $mesa = new Mesa();
-        $mesa->id_mesa = $id_mesa;
-        $mesa->tiempo_estimado = $tiempo_estimado;
+        $mesa->codigo = $codigo;
 
         try 
         {
             $id_nuevo_mesa = $mesa->crearMesa();
-            $payload = json_encode(array("mensaje" => "Mesa creada con éxito", "id_mesa" => $id_nuevo_mesa));
+            $payload = json_encode(array("mensaje" => "Mesa creada con exito", "id_mesa" => $id_nuevo_mesa));
             $response = $response->withStatus(201);
         } catch (Exception $e) 
         {
@@ -34,27 +32,53 @@ class MesaController extends Mesa implements IApiUsable
     public function TraerUno($request, $response, $args)
     {
 
-        $id = $args['id'];
+        if(isset($args['id']))
+        {
+            $id = $args['id'];
         
-        try 
-        {
-            $mesa = Mesa::obtenerMesa($id);
-            
-            if ($mesa) 
+            try 
             {
-                $payload = json_encode($mesa);
-                $response->getBody()->write($payload);
-                return $response->withHeader('Content-Type', 'application/json')->withStatus(200);
-            } else 
+                $mesa = Mesa::obtenerMesa($id);
+                
+                if ($mesa) 
+                {
+                    $payload = json_encode($mesa);
+                    $response->getBody()->write($payload);
+                    return $response->withHeader('Content-Type', 'application/json')->withStatus(200);
+                } else 
+                {
+                    $payload = json_encode(array("mensaje" => "Mesa no encontrada"));
+                    return $response->withHeader('Content-Type', 'application/json')->withStatus(404)->write($payload);
+                }
+            } catch (Exception $e) 
             {
-                $payload = json_encode(array("mensaje" => "Mesa no encontrada"));
-                return $response->withHeader('Content-Type', 'application/json')->withStatus(404)->write($payload);
+                $payload = json_encode(array("mensaje" => "Error al obtener la mesa: " . $e->getMessage()));
+                return $response->withHeader('Content-Type', 'application/json')->withStatus(500)->write($payload);
             }
-        } catch (Exception $e) 
-        {
-            $payload = json_encode(array("mensaje" => "Error al obtener la mesa: " . $e->getMessage()));
-            return $response->withHeader('Content-Type', 'application/json')->withStatus(500)->write($payload);
         }
+        else
+        {
+            try 
+            {
+                $mesa = Mesa::mesaLibre();
+                
+                if ($mesa) 
+                {
+                    $payload = json_encode($mesa);
+                    $response->getBody()->write($payload);
+                    return $response->withHeader('Content-Type', 'application/json')->withStatus(200);
+                } else 
+                {
+                    $payload = json_encode(array("mensaje" => "Mesa libre no encontrada"));
+                    return $response->withHeader('Content-Type', 'application/json')->withStatus(404)->write($payload);
+                }
+            } catch (Exception $e) 
+            {
+                $payload = json_encode(array("mensaje" => "Error al obtener la mesa: " . $e->getMessage()));
+                return $response->withHeader('Content-Type', 'application/json')->withStatus(500)->write($payload);
+            }
+
+        } 
     }
 
     public function TraerTodos($request, $response, $args)
@@ -69,22 +93,64 @@ class MesaController extends Mesa implements IApiUsable
     
     public function ModificarUno($request, $response, $args)
     {
-        $parametros = $request->getParsedBody();
-        $id = $parametros['id'];
-        $estado = $parametros['estado'];
+        if(isset($args['id']))
+        {
+            $id = $args['id'];
 
-        try 
+            $estadoActual = Mesa::traerEstado($id);
+
+            if($estadoActual == "cerrada")
+            {
+                try 
+                {
+                    Mesa::modificarEstado($id, "con clientes esperando pedido");
+                    $payload = json_encode(array("mensaje" => "Mesa modificada correctamente"));
+                    
+                    $response->getBody()->write($payload);
+                    return $response->withHeader('Content-Type', 'application/json')->withStatus(200);
+                } catch (Exception $e) 
+                {
+                    $payload = json_encode(array("mensaje" => "Error al modificar la mesa: " . $e->getMessage()));
+                    return $response->withHeader('Content-Type', 'application/json')->withStatus(500)->write($payload);
+                } 
+            }
+            else
+            {
+                if($estadoActual == "con clientes comiendo")
+                {
+                    $ganancias = $request->getAttribute('ganancias');
+
+                    try
+                    {
+                        Mesa::modificarEstado($id, "con clientes pagando");
+                        Mesa::modificarGanancias($id, $ganancias);
+                        
+                        $payload = json_encode(array("mensaje" => "Mesa pagada correctamente"));
+                            
+                        $response->getBody()->write($payload);
+                        return $response->withHeader('Content-Type', 'application/json')->withStatus(200);
+                    } catch (Exception $e) 
+                    {
+                        $payload = json_encode(array("mensaje" => "Error al querer cobrar la mesa: " . $e->getMessage()));
+                        $response->getBody()->write($payload);
+                        return $response->withHeader('Content-Type', 'application/json')->withStatus(500);
+                    }  
+                }
+                else
+                {
+                    $payload = json_encode(array("mensaje" => "No se puede cobrar la mesa"));
+                    $response->getBody()->write($payload);
+                    return $response->withHeader('Content-Type', 'application/json')->withStatus(400);
+                }
+            }
+        }
+        else
         {
-            Mesa::modificarEstado($id, $estado);
-            $payload = json_encode(array("mensaje" => "Mesa modificada correctamente"));
-            
-            $response->getBody()->write($payload);
-            return $response->withHeader('Content-Type', 'application/json')->withStatus(200);
-        } catch (Exception $e) 
-        {
-            $payload = json_encode(array("mensaje" => "Error al modificar la mesa: " . $e->getMessage()));
+            $payload = json_encode(array("mensaje" => "Error con la ruta"));
             return $response->withHeader('Content-Type', 'application/json')->withStatus(500)->write($payload);
         }
+       
+        
     }
 
     public function BorrarUno($request, $response, $args)
@@ -114,5 +180,32 @@ class MesaController extends Mesa implements IApiUsable
             $response->getBody()->write($payload);
             return $response->withHeader('Content-Type', 'application/json')->withStatus(500);
         }   
+    }
+
+    public static function CerrarMesa($request, $response, $args)
+    {
+        $id = $args['id'];
+
+        try 
+        {
+            Mesa::modificarEstado($id, "cerrada");
+            $payload = json_encode(array("mensaje" => "Mesa cerrada correctamente"));
+                    
+            $response->getBody()->write($payload);
+            return $response->withHeader('Content-Type', 'application/json')->withStatus(200);
+        } catch (Exception $e) 
+        {
+            $payload = json_encode(array("mensaje" => "Error al cerrar la mesa: " . $e->getMessage()));
+            return $response->withHeader('Content-Type', 'application/json')->withStatus(500)->write($payload);
+        } 
+    }
+
+    public static function TraerEstadoDeMesas($request, $response)
+    {
+        $lista = Mesa::obtenerEstados();
+        $payload = json_encode(array("lista estado de mesas" => $lista));
+
+        $response->getBody()->write($payload);
+        return $response->withHeader('Content-Type', 'application/json');
     }
 }

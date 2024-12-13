@@ -1,4 +1,5 @@
 <?php
+
 require_once './models/Operacion.php';
 require_once './interfaces/IApiUsable.php';
 
@@ -10,15 +11,17 @@ class OperacionController extends Operacion implements IApiUsable
 
         $id_usuario = $parametros['id_usuario'];
         $fecha = $parametros['fecha'];
+        $accion = $parametros['accion'];
 
         $operacion = new Operacion();
         $operacion->id_usuario = $id_usuario;
         $operacion->fecha = $fecha;
+        $operacion->accion = $accion;
 
         try 
         {
             $id_nuevo_operacion = $operacion->crearOperacion();
-            $payload = json_encode(array("mensaje" => "Operacion creada con éxito", "id_asistencia" => $id_nuevo_operacion));
+            $payload = json_encode(array("mensaje" => "Operacion creada con éxito", "id_operacion" => $id_nuevo_operacion));
             $response = $response->withStatus(201);
         } catch (Exception $e) 
         {
@@ -73,10 +76,11 @@ class OperacionController extends Operacion implements IApiUsable
         $id = $parametros['id'];
         $id_usuario = $parametros['id_usuario'];
         $fecha = $parametros['fecha'];
+        $accion = $parametros['accion'];
 
         try 
         {
-            Operacion::modificarOperacion($id, $id_usuario, $fecha);
+            Operacion::modificarOperacion($id, $id_usuario, $fecha, $accion);
             $payload = json_encode(array("mensaje" => "Operacion modificada correctamente"));
             
             $response->getBody()->write($payload);

@@ -9,16 +9,14 @@ class AsistenciaController extends Asistencia implements IApiUsable
         $parametros = $request->getParsedBody();
 
         $id_usuario = $parametros['id_usuario'];
-        $fecha = $parametros['fecha'];
 
         $asistencia = new Asistencia();
         $asistencia->id_usuario = $id_usuario;
-        $asistencia->fecha = $fecha;
 
         try 
         {
             $id_nuevo_asistencia = $asistencia->crearAsistencia();
-            $payload = json_encode(array("mensaje" => "Asistencia creada con éxito", "id_asistencia" => $id_nuevo_asistencia));
+            $payload = json_encode(array("mensaje" => "Asistencia creada con exito", "id_asistencia" => $id_nuevo_asistencia));
             $response = $response->withStatus(201);
         } catch (Exception $e) 
         {
