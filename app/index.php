@@ -111,6 +111,7 @@ $app->group('/admin', function (RouteCollectorProxy $group) use ($validarRolMidd
     $group->delete('/despedir/{id}', \UsuarioController::class . ':BorrarUno')->add($validarRolMiddleware);
     $group->get('/pedido/{id}', \PedidoController::class . ':TraerTiempoRestante');
     $group->get('/pedidos/tarde', \PedidoController::class . ':TraerPedidosEntregadosTarde');
+    $group->get('/productos/tarde', \Pedido_productoController::class . ':TraerProductosEntregadosTarde');
     $group->get('/pedidos/estado', \PedidoController::class . ':TraerEstadoDePedidos');
     $group->get('/mesas/estado', \MesaController::class . ':TraerEstadoDeMesas');
     $group->get('/encuestas/comentarios', \EncuestaController::class . ':TraerMejoresComentarios');

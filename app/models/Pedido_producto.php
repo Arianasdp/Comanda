@@ -104,4 +104,13 @@ class Pedido_producto
         return $resultado['estado'] ?? null;
     }
 
+    public static function obtenerFueraDeTiempo()
+    {
+        $objAccesoDatos = AccesoDatos::obtenerInstancia();
+        $consulta = $objAccesoDatos->prepararConsulta("SELECT *, TIMESTAMPDIFF(MINUTE, fecha_inicio, fecha_entrega) AS tiempo_real, IF(fecha_entrega <= ADDTIME(fecha_inicio, SEC_TO_TIME(tiempo_estimado * 60)), 'A tiempo', 'Fuera de tiempo') AS estado_entrega FROM pedido_productos WHERE fecha_entrega > ADDTIME(fecha_inicio, SEC_TO_TIME(tiempo_estimado * 60))");
+        $consulta->execute();
+        $resultado = $consulta->fetchAll(PDO::FETCH_ASSOC);
+
+        return $resultado ?? null;
+    }
 }

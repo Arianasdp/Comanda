@@ -173,4 +173,13 @@ class Pedido_productoController extends Pedido_producto implements IApiUsable
             return $response->withHeader('Content-Type', 'application/json')->withStatus(500);
         }   
     }
+
+    public static function TraerProductosEntregadosTarde($request, $response)
+    {
+        $lista = Pedido_producto::obtenerFueraDeTiempo();
+        $payload = json_encode(array("lista Productos entregados fuera de tiempo" => $lista));
+
+        $response->getBody()->write($payload);
+        return $response->withHeader('Content-Type', 'application/json');
+    }
 }
