@@ -27,6 +27,7 @@ require_once './middlewares/ManejarAsistencias.php';
 require_once './middlewares/RegistrarOperacion.php';
 require_once './middlewares/ValidarEncuesta.php';
 require_once './middlewares/ValidarRol.php';
+require_once './middlewares/ValidarPedidoYProducto.php';
 
 require_once './controllers/UsuarioController.php';
 require_once './controllers/MesaController.php';
@@ -68,6 +69,7 @@ $manejarAsistenciasMiddleware = new ManejarAsistenciasMiddleware(['cocinero', 'c
 $registrarOperacionMiddleware = new RegistrarOperacionMiddleware();
 $validarEncuestaMiddleware = new ValidarEncuestaMiddleware();
 $validarRolMiddleware = new ValidarRolMiddleware(['cocinero', 'cervecero', 'bartender', 'mozo']);
+$validarPedidoYProductoMiddleware = new ValidarPedidoYProductoMiddleware();
 
 //mi conexión
 //php -S localhost:666 -t app
@@ -76,13 +78,12 @@ $validarRolMiddleware = new ValidarRolMiddleware(['cocinero', 'cervecero', 'bart
 $app->post('/login', \UsuarioController::class . ':login')->add($manejarAsistenciasMiddleware);
 
 //Mozo
-$app->group('/mozo', function (RouteCollectorProxy $group) use ($actualizarPrecioPedidoMiddleware, $calcularGananciasMiddleware, $actualizarStockMiddleware, $actualizarMesaServidaMiddleware) {
+$app->group('/mozo', function (RouteCollectorProxy $group) use ($actualizarPrecioPedidoMiddleware, $calcularGananciasMiddleware, $actualizarStockMiddleware, $actualizarMesaServidaMiddleware, $validarPedidoYProductoMiddleware) {
   $group->get('/mesalibre', \MesaController::class . ':TraerUno');
   $group->put('/mesa/{id}', \MesaController::class . ':ModificarUno');
   $group->post('/pedido', \PedidoController::class . ':CargarUno');
   $group->get('/productos', \ProductoController::class . ':TraerTodos');
-  //validar que el id pedido sea de un pedido pendiente en existencia, y que el id producto sea real
-  $group->post('/producto', \Pedido_productoController::class . ':CargarUno')->add($actualizarPrecioPedidoMiddleware)->add($actualizarStockMiddleware);
+  $group->post('/producto', \Pedido_productoController::class . ':CargarUno')->add($actualizarPrecioPedidoMiddleware)->add($actualizarStockMiddleware)->add($validarPedidoYProductoMiddleware);
   $group->get('/pedidos/listos', \PedidoController::class . ':TraerListos');
   $group->put('/pedido/{id}', \PedidoController::class . ':Servido')->add($actualizarMesaServidaMiddleware);
   $group->put('/cobro/mesa/{id}', \MesaController::class . ':ModificarUno')->add($calcularGananciasMiddleware);
